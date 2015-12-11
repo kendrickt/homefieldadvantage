@@ -3,6 +3,10 @@ from game import Game
 
 
 def read_game_file(f):
+    """
+    Reads through a .csv containing game data and creates a game for each line.
+    The list of games is returned.
+    """
     games = []
     f.next()  # header
     for line in f:
@@ -13,6 +17,10 @@ def read_game_file(f):
 
 
 def line_to_game(line):
+    """
+    Given a line of text from a .csv containing game data,
+    the line is encoded into a Game object which is then returned
+    """
     data = line.split(',')
     year, team, ishome, week, pts, ptsallowed = (
         int(data[0]), data[1], int(data[2]),
@@ -22,6 +30,10 @@ def line_to_game(line):
 
 
 def partition_games(games, partitioner):
+    """
+    Given a list of games and a way to define a key (partitioner),
+    the games are partitioned with a dictionary and the dictionary is returned.
+    """
     partitions = {}
     for game in games:
         key = partitioner(game)
@@ -33,6 +45,11 @@ def partition_games(games, partitioner):
 
 
 def write_stat(games, eq_class_func, get_stat, mask, filename):
+    """
+    Takes the game(s), partitions them according to the equivalence class func,
+    filters each partition through the mask, and writes a data file containing
+    the statistics of each filtered partition in the filename.
+    """
     out = file(filename, 'w')
     if eq_class_func:
         partition = partition_games(games, eq_class_func)
@@ -49,6 +66,11 @@ def write_stat(games, eq_class_func, get_stat, mask, filename):
 
 
 def write_home_win_rating(games):
+    """
+    Given a list of games, the games are partitioned by their year and week.
+    Then a .dat file containing the at-home win-rating for each partition
+    is written.
+    """
     write_stat(
         games,
         lambda x: (x.week, x.year),
@@ -58,41 +80,11 @@ def write_home_win_rating(games):
     )
 
 
-def get_home_win_rating(games, mask):
-    wins, num_of_games = 0.0, 0.0
-    for game in games:
-        if mask(game):
-            if game.pts > game.ptsallowed:
-                wins += 1.0
-            num_of_games += 1.0
-    if num_of_games > 0:
-        return wins / num_of_games
-    else:
-        return None
-
-
-def get_ppg(games, mask):
-    if type(games) is list:
-        pts, num_of_games = 0.0, 0.0
-        for game in games:
-            if mask(game):
-                pts += game.pts
-                num_of_games += 1.0
-        if num_of_games > 0:
-            return pts / num_of_games
-        else:
-            return None
-    else:
-        game = games
-        if mask(game):
-            pts = game.pts
-            num_of_games = 1.0
-            return pts / num_of_games
-        else:
-            return None
-
-
 def write_home_ppg(games):
+    """
+    Given a list of games, a .dat file containing a list of points
+    scored of each home game is written.
+    """
     write_stat(
         games,
         None,
@@ -103,6 +95,10 @@ def write_home_ppg(games):
 
 
 def write_away_ppg(games):
+    """
+    Given a list of games, a .dat file containing a list of points
+    scored of each away game is written.
+    """
     write_stat(
         games,
         None,
@@ -113,6 +109,10 @@ def write_away_ppg(games):
 
 
 def write_total_ppg(games):
+    """
+    Given a list of games, a .dat file containing a list of points
+    scored of each game is written.
+    """
     write_stat(
         games,
         None,
@@ -123,9 +123,13 @@ def write_total_ppg(games):
 
 
 def write_spread(games):
+    """
+    Given a list of games, a .dat file containing a list of spread
+    of each home game is written.
+    """
     write_stat(
         games,
-        lambda x: x,
+        None,
         get_spread,
         lambda x: x.ishome,
         'data/home_spread.dat'
@@ -133,15 +137,70 @@ def write_spread(games):
 
 
 def get_spread(games, mask):
-    spread, num_of_games = 0, 0.0
+    """
+    Given a list of games, or a single game, the game(s) are filtered
+    through the mask, and the spread per game of the remaining games
+    is returned.
+    """
+    if type(games) is list:
+        spread, num_of_games = 0.0, 0.0
+        for game in games:
+            if mask(game):
+                spread += game.pts - game.ptsallowed
+                num_of_games += 1.0
+        if num_of_games:
+            return spread / num_of_games
+    elif mask(games):
+        return games.pts - games.ptsallowed
+    return None
+
+
+def get_home_win_rating(games, mask):
+    """
+    Given a list of games, the games are filtered through the mask,
+    and the percentage of wins in the filtered set is returned
+    """
+    wins, num_of_games = 0.0, 0.0
     for game in games:
         if mask(game):
-            spread += game.pts - game.ptsallowed
+            if game.pts > game.ptsallowed:
+                wins += 1.0
             num_of_games += 1.0
-    if num_of_games:
-        return spread / num_of_games
-    else:
-        return None
+    if num_of_games > 0:
+        return wins / num_of_games
+    return None
+
+
+def get_ppg(games, mask):
+    """
+    Given a list of games, or a single game, the game(s) are filtered
+    through the mask, and the points scored per game of the remaining games
+    is returned.
+    """
+    if type(games) is list:
+        pts, num_of_games = 0.0, 0.0
+        for game in games:
+            if mask(game):
+                pts += game.pts
+                num_of_games += 1.0
+        if num_of_games > 0:
+            return pts / num_of_games
+    elif mask(games):
+        return games.pts
+    return None
+
+
+def get_data(filename):
+    """
+    Used to retrieve a list of data from a .dat file.
+    This is used externally.
+    """
+    f = file(filename, 'r')
+    data = []
+    for line in f:
+        data.append(float(line))
+    f.close()
+    return data
 
 
 if __name__ == "__main__":
@@ -153,7 +212,8 @@ if __name__ == "__main__":
         'homeppg': write_home_ppg,
         'awayppg': write_away_ppg,
         'totalppg': write_total_ppg,
-        'winrating': write_home_win_rating
+        'winrating': write_home_win_rating,
+        'spread': write_spread
     }
 
     if func in function_dict:

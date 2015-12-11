@@ -1,5 +1,14 @@
 class Game(object):
+    """
+    For a specific team, the Game object contains information about a specific
+    Game's year, week, whether the team was at home, the points scored,
+    and points allowed.
+    """
+
     def __init__(self, year, week, team, ishome, pts, ptsallowed):
+        """
+        Game object constructor
+        """
         self.year = year
         self.week = week
         self.team = team

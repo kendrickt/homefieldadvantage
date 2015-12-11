@@ -3,6 +3,10 @@ import nflgame
 
 
 def combine_games(years):
+    """
+    Given a list of years, the .csv files associated with those years
+    are concatenated into a combined game csv.
+    """
     combined_games = file('games/games_combined.csv', 'w')
     print_header(combined_games)
 
@@ -13,36 +17,26 @@ def combine_games(years):
             print year,
             print 'does not have a file associated with it'
             break
-        """
-        home_games = file('games/games_home_' + year + '.csv', 'w')
-        away_games = file('games/games_away_' + year + '.csv', 'w')
-        print_header(home_games)
-        print_header(away_games)
-        """
 
         f.next()  # header
         for line in f:
-            """
-            ishome = int(line.split(',')[1])
-            if ishome:
-                home_games.write(line)
-            else:
-                away_games.write(line)
-            """
             combined_games.write(year + ',' + line)
         f.close()
-        """
-        home_games.close()
-        away_games.close()
-        """
     combined_games.close()
 
 
 def print_header(f):
+    """
+    Writes the common header to the file f.
+    """
     f.write('team,ishome,week,pts,ptsallowed\n')
 
 
 def get_games(years):
+    """
+    Given a list of N years, N .csv files will be written,
+    each containing game data for the regular season of that year.
+    """
     for year in years:
         f = file('games/games_' + year + '.csv', 'w')
         print_header(f)
