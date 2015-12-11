@@ -1,14 +1,14 @@
 import numpy as np
 from math import sqrt
+from make_dat_files import get_data
 
+"""
+This file calculates the t-value to determine whether home ppgs is
+different from away ppgs in an unpaired and paired t-test.
 
-def get_data(filename):
-    f = file(filename, 'r')
-    data = []
-    for line in f:
-        data.append(float(line))
-    f.close()
-    return data, np.mean(data), len(data)
+Both tests result with very large t-values, mainly because the sample size
+is so large (over 1500 games). I don't find this very interesting.
+"""
 
 
 def get_std(dat1, dat2):
@@ -20,8 +20,12 @@ def get_std(dat1, dat2):
 
 
 if __name__ == "__main__":
-    home, home_mean, home_n = get_data('data/homeppg.dat')
-    away, away_mean, away_n = get_data('data/awayppg.dat')
+    home = get_data('data/home_ppg.dat')
+    home_mean, home_n = np.mean(home), len(home)
+
+    away = get_data('data/away_ppg.dat')
+    away_mean, away_n = np.mean(away), len(away)
+
     std = get_std(home, away)
     print (home_mean - away_mean) / sqrt(std * (1.0/home_n + 1.0/away_n))
 
@@ -30,7 +34,7 @@ if __name__ == "__main__":
         spread.append(home[i] - away[i])
     spread_mean = np.mean(spread)
     spread_std = np.std(spread)
-    f = file('data/spread.dat', 'w')
+    f = file('data/home_spread.dat', 'w')
     for val in spread:
         f.write(str(val) + '\n')
     f.close()

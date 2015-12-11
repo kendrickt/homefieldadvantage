@@ -1,7 +1,11 @@
 import sys
 from compare_all_games import read_game_file as rgf
 
-
+"""
+This file grabs the five teams listed from bleacher reports 2011 list of
+top 5 hardest home fields to play against. Then looks at how those teams'
+performances differ when they play at home vs away.
+"""
 if __name__ == '__main__':
     f = file('games/games_combined.csv', 'r')
     teams = sys.argv[1:]
