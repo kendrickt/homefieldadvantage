@@ -2,11 +2,13 @@ import sys
 from game import Game
 
 
-def read_game_file(f):
+def read_game_file(filename):
     """
     Reads through a .csv containing game data and creates a game for each line.
     The list of games is returned.
     """
+    f = file(filename, 'r')
+    print filename
     games = []
     f.next()  # header
     for line in f:
@@ -204,8 +206,7 @@ def get_data(filename):
 
 
 if __name__ == "__main__":
-    f = file('games/games_combined.csv', 'r')
-    games = read_game_file(f)
+    games = read_game_file('games/games_combined.csv')
 
     func = sys.argv[1]
     function_dict = {

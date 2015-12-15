@@ -20,7 +20,7 @@ def combine_games(years):
 
         f.next()  # header
         for line in f:
-            combined_games.write(year + ',' + line)
+            combined_games.write('%s,%s' % (year, line))
         f.close()
     combined_games.close()
 
@@ -29,7 +29,7 @@ def print_header(f):
     """
     Writes the common header to the file f.
     """
-    f.write('team,ishome,week,pts,ptsallowed\n')
+    f.write('year,team,ishome,week,pts,ptsallowed\n')
 
 
 def get_games(years):
@@ -44,17 +44,25 @@ def get_games(years):
         games = nflgame.games(int(year))
         for game in games:
             home_team = game.home
-            home_score = str(game.score_home)
+            home_score = game.score_home
             away_team = game.away
-            away_score = str(game.score_away)
+            away_score = game.score_away
             week = game.schedule['week']
 
             f.write(
-                home_team + ',1,' + str(week) + ',' + home_score + ',' +
-                away_score + '\n')
+                '%s,%s,%d,%d,%d,%d\n' % (year,
+                                         home_team,
+                                         1,
+                                         week,
+                                         home_score,
+                                         away_score))
             f.write(
-                away_team + ',0,' + str(week) + ',' + away_score + ',' +
-                home_score + '\n')
+                '%s,%s,%d,%d,%d,%d\n' % (year,
+                                         away_team,
+                                         0,
+                                         week,
+                                         away_score,
+                                         home_score))
         f.close()
 
 
