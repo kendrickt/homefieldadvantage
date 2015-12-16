@@ -20,7 +20,7 @@ def combine_games(years):
 
         f.next()  # header
         for line in f:
-            combined_games.write('%s,%s' % (year, line))
+            combined_games.write('%s' % line)
         f.close()
     combined_games.close()
 
@@ -50,19 +50,13 @@ def get_games(years):
             week = game.schedule['week']
 
             f.write(
-                '%s,%s,%d,%d,%d,%d\n' % (year,
-                                         home_team,
-                                         1,
-                                         week,
-                                         home_score,
-                                         away_score))
+                '%s,%s,%d,%d,%d,%d\n' %
+                (year, home_team, 1, week, home_score, away_score)
+            )
             f.write(
-                '%s,%s,%d,%d,%d,%d\n' % (year,
-                                         away_team,
-                                         0,
-                                         week,
-                                         away_score,
-                                         home_score))
+                '%s,%s,%d,%d,%d,%d\n' %
+                (year, away_team, 0, week, away_score, home_score)
+            )
         f.close()
 
 
