@@ -8,7 +8,6 @@ def read_game_file(filename):
     The list of games is returned.
     """
     f = file(filename, 'r')
-    print filename
     games = []
     f.next()  # header
     for line in f:
@@ -200,7 +199,21 @@ def get_data(filename):
     f = file(filename, 'r')
     data = []
     for line in f:
-        data.append(float(line))
+        #  I have two data formats: (float), and (string,float,integer,integer)
+        line_data = line.split(',')
+        if len(line_data) == 1:
+            data.append(float(line_data[0]))
+        elif len(line_data) == 5:
+            data.append(
+                (str(line_data[0]),
+                 float(line_data[1]),
+                 int(line_data[2]),
+                 int(line_data[3]),
+                 int(line_data[4]))
+            )
+        else:
+            print "Warning, invalid .dat file format."
+
     f.close()
     return data
 

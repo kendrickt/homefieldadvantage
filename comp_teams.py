@@ -103,157 +103,188 @@ def get_stat_diff(homestats, awaystats):
     return Stats(ppg_diff, papg_diff, spg_diff, winrating_diff, win_diff)
 
 
-def examine_stat(team_stats, n, filter_func, sort_key, reverse):
+def examine_stat(team_stats, n, filter_func, sort_key, reverse, f=None):
     """
-    Filters the set of teams and sorts them by a specific key (e.g. at-home ppg)
+    Sorts the teams by a specific key (e.g. at-home ppg).
     and then returns the n teams with the highest (reverse=True),
     or lowest (reverse=False) key value.
+
+    The filter_func is used to mark specific teams,
+    e.g. teams whose at-home ppg is less than their away ppg.
     """
-    team_stats_filtered = filter(filter_func, team_stats)
-    team_stats_filtered.sort(key=sort_key, reverse=reverse)
-    return team_stats_filtered[0:n]
+
+    team_stats.sort(key=sort_key, reverse=reverse)
+
+    for team in team_stats[0:n]:
+        s = ('%s,%1.3f,%d,%d,%d' %
+             (team.name, sort_key(team), filter_func(team),
+              team.home.wins, team.total.wins))
+        if f:
+            f.write(s + '\n')
+        else:
+            print s
+    return team_stats[0:n]
 
 
-def examine_ppg(team_stats, n):
-    teams_by_ppg = examine_stat(
+def examine_ppg(team_stats, n, f=None):
+    examine_stat(
         team_stats,
         n,
         lambda x: x.home.ppg > x.away.ppg,
         lambda x: x.home.ppg,
-        True
+        True,
+        f
     )
-    for team in teams_by_ppg:
-        print team.name, team.home.ppg, team.away.ppg
 
 
-def examine_papg(team_stats, n):
-    teams_by_papg = examine_stat(
+def examine_papg(team_stats, n, f=None):
+    examine_stat(
         team_stats,
         n,
         lambda x: x.home.papg < x.away.papg,
         lambda x: x.home.papg,
-        False
+        False,
+        f
     )
-    for team in teams_by_papg:
-        print team.name, team.home.papg, team.away.papg
 
 
-def examine_spg(team_stats, n):
-    teams_by_spg = examine_stat(
+def examine_spg(team_stats, n, f=None):
+    examine_stat(
         team_stats,
         n,
         lambda x: x.home.spg > x.away.spg,
         lambda x: x.home.spg,
-        True
+        True,
+        f
     )
-    for team in teams_by_spg:
-        print team.name, team.home.spg, team.away.spg
 
 
-def examine_winrating(team_stats, n):
-    teams_by_winrating = examine_stat(
+def examine_winrating(team_stats, n, f=None):
+    examine_stat(
         team_stats,
         n,
         lambda x: x.home.winrating > x.away.winrating,
         lambda x: x.home.winrating,
-        True
+        True,
+        f
     )
-    for team in teams_by_winrating:
-        print team.name, team.home.winrating, team.away.winrating
 
 
-def examine_ppgratio(team_stats, n):
-    teams_by_ppgratio = examine_stat(
+def examine_ppgratio(team_stats, n, f=None):
+    examine_stat(
         team_stats,
         n,
         lambda x: x.home.ppg > x.away.ppg,
         lambda x: x.ratio.ppg,
-        True
+        True,
+        f
     )
-    for team in teams_by_ppgratio:
-        print team.name, team.ratio.ppg
 
 
-def examine_papgratio(team_stats, n):
-    teams_by_papgratio = examine_stat(
+def examine_papgratio(team_stats, n, f=None):
+    examine_stat(
         team_stats,
         n,
         lambda x: x.home.papg < x.away.papg,
         lambda x: x.ratio.papg,
-        False
+        False,
+        f
     )
-    for team in teams_by_papgratio:
-        print team.name, team.ratio.papg
 
 
-def examine_winratingratio(team_stats, n):
-    teams_by_winratingratio = examine_stat(
+def examine_winratingratio(team_stats, n, f=None):
+    examine_stat(
         team_stats,
         n,
         lambda x: x.home.winrating > x.away.winrating,
         lambda x: x.ratio.winrating,
-        True
+        True,
+        f
     )
-    for team in teams_by_winratingratio:
-        print team.name, team.ratio.winrating
 
 
-def examine_ppgdiff(team_stats, n):
-    teams_by_ppgdiff = examine_stat(
+def examine_ppgdiff(team_stats, n, f=None):
+    examine_stat(
         team_stats,
         n,
         lambda x: x.home.ppg > x.away.ppg,
         lambda x: x.diff.ppg,
-        True
+        True,
+        f
     )
-    for team in teams_by_ppgdiff:
-        print team.name, team.diff.ppg
 
 
-def examine_papgdiff(team_stats, n):
-    teams_by_papgdiff = examine_stat(
+def examine_papgdiff(team_stats, n, f=None):
+    examine_stat(
         team_stats,
         n,
         lambda x: x.home.papg < x.away.papg,
         lambda x: x.diff.papg,
-        True
+        True,
+        f
     )
-    for team in teams_by_papgdiff:
-        print team.name, team.diff.papg
 
 
-def examine_spgdiff(team_stats, n):
-    teams_by_spgdiff = examine_stat(
+def examine_spgdiff(team_stats, n, f=None):
+    examine_stat(
         team_stats,
         n,
         lambda x: x.home.spg > x.away.spg,
         lambda x: x.diff.spg,
-        True
+        True,
+        f
     )
-    for team in teams_by_spgdiff:
-        print team.name, team.diff.spg
 
 
-def examine_winratingdiff(team_stats, n):
-    teams_by_winratingdiff = examine_stat(
+def examine_winratingdiff(team_stats, n, f=None):
+    examine_stat(
         team_stats,
         n,
         lambda x: x.home.winrating > x.away.winrating,
         lambda x: x.diff.winrating,
-        True
+        True,
+        f
     )
-    for team in teams_by_winratingdiff:
-        print team.name, team.diff.winrating
 
 
 if __name__ == '__main__':
-    func, years, n = sys.argv[1], sys.argv[2], int(sys.argv[3])
+    func, years = sys.argv[1], sys.argv[2]
+    sys.argv[3]
+    try:
+        n = int(sys.argv[3])
+    except IndexError:
+        print "Warning: n is not defined. n is defaulted to 10."
+        n = 10
+
     team_dict = get_team_dict('games/games_%s.csv' % years)
     team_stats = [Team(team, team_dict[team]) for team in team_dict]
 
     # Bleacher report lists SEA, CHI, MIN, DEN, and KC as the top 5 home
     # stadiums.
 
+    func_dict = {
+        'ppg': examine_ppg,
+        'ppgratio': examine_ppgratio,
+        'ppgdiff': examine_ppgdiff,
+        'papg': examine_papg,
+        'papgratio': examine_papgratio,
+        'papgdiff': examine_papgdiff,
+        'spg': examine_spg,
+        'spgdiff': examine_spgdiff,
+        'winrating': examine_winrating,
+        'winratingratio': examine_winratingratio,
+        'winratingdiff': examine_winratingdiff
+    }
+
+    if func in func_dict.keys():
+        func_dict[func](team_stats, n)
+    elif func == 'make':
+        for func in func_dict.keys():
+            fs = file('data/%s_top_%s.dat' % (years, func), 'w')
+            func_dict[func](team_stats, n, f=fs)
+            fs.close()
+
+"""
     if func == 'ppg':
         examine_ppg(team_stats, n)
     elif func == 'papg':
@@ -276,3 +307,48 @@ if __name__ == '__main__':
         examine_spgdiff(team_stats, n)
     elif func == 'winratingdiff':
         examine_winratingdiff(team_stats, n)
+    elif func == 'make':
+        f = file('data/%s_top_ppg.dat' % years, 'w')
+        examine_ppg(team_stats, n, f=f)
+        f.close()
+
+        f = file('data/%s_top_ppgratio.dat' % years, 'w')
+        examine_ppgratio(team_stats, n, f=f)
+        f.close()
+
+        f = file('data/%s_top_ppgdiff.dat' % years, 'w')
+        examine_ppgdiff(team_stats, n, f=f)
+        f.close()
+
+        f = file('data/%s_top_papg.dat' % years, 'w')
+        examine_papg(team_stats, n, f=f)
+        f.close()
+
+        f = file('data/%s_top_papgratio.dat' % years, 'w')
+        examine_papgratio(team_stats, n, f=f)
+        f.close()
+
+        f = file('data/%s_top_papgdiff.dat' % years, 'w')
+        examine_papgdiff(team_stats, n, f=f)
+        f.close()
+
+        f = file('data/%s_top_spg.dat' % years, 'w')
+        examine_spg(team_stats, n, f=f)
+        f.close()
+
+        f = file('data/%s_top_spgdiff.dat' % years, 'w')
+        examine_spgdiff(team_stats, n, f=f)
+        f.close()
+
+        f = file('data/%s_top_winrating.dat' % years, 'w')
+        examine_winrating(team_stats, n, f=f)
+        f.close()
+
+        f = file('data/%s_top_winratingratio.dat' % years, 'w')
+        examine_winratingratio(team_stats, n, f=f)
+        f.close()
+
+        f = file('data/%s_top_winratingdiff.dat' % years, 'w')
+        examine_winratingdiff(team_stats, n, f=f)
+        f.close()
+        """
