@@ -24,17 +24,18 @@ class Team(object):
 class Stats(object):
     """
     An object which contains the points per game, points allowed per game,
-    and spread per game for a set of games
+    spread per game, win rating, and total wins for a set of games
     """
-    def __init__(self, ppg, papg, spg, winrating):
+    def __init__(self, ppg, papg, spg, winrating, wins):
         self.ppg = ppg
         self.papg = papg
         self.spg = spg
         self.winrating = winrating
+        self.wins = wins
 
     def __repr__(self):
-        return ('%1.3f,%1.3f,%1.3f,%1.3f' %
-                (self.ppg, self.papg, self.spg, self.winrating))
+        return ('%1.3f,%1.3f,%1.3f,%1.3f,%1f' %
+                (self.ppg, self.papg, self.spg, self.winrating, self.wins))
 
 
 def get_team_dict(filename):
@@ -66,7 +67,7 @@ def get_stats(games):
         if game.pts > game.ptsallowed:
             wins += 1.0
     return Stats(pts/len(games), ptsallowed/len(games),
-                 spread/len(games), wins/len(games))
+                 spread/len(games), wins/len(games), wins)
 
 
 def get_stat_ratio(homestats, awaystats):
@@ -75,108 +76,173 @@ def get_stat_ratio(homestats, awaystats):
     There are +delta's everywhere to avoid dividing by zero problems.
     I don't look at the ratio of home spread per game vs away spread per game
     because I can't think of a great way to avoid division by zero.
+    Instead, you can look at the home-away spread differential.
     """
     delta = 0.00001
     ppg_ratio = (homestats.ppg+delta) / (awaystats.ppg+delta)
     papg_ratio = (homestats.papg+delta) / (awaystats.papg+delta)
-    spg_ratio = 0
     winrating_ratio = (homestats.winrating+delta) / (awaystats.winrating+delta)
-    return Stats(ppg_ratio, papg_ratio, spg_ratio, winrating_ratio)
+
+    spg_ratio = 0.0  # Isn't being used.
+    win_ratio = 0.0  # Isn't being used.
+
+    return Stats(ppg_ratio, papg_ratio, spg_ratio, winrating_ratio, win_ratio)
 
 
 def get_stat_diff(homestats, awaystats):
+    """
+    Returns the difference of two sets of Stats as a Stats object.
+    I'm only ever interested for differences greater than 0.
+    """
     ppg_diff = homestats.ppg - awaystats.ppg
     papg_diff = homestats.papg - awaystats.papg
     spg_diff = homestats.spg - awaystats.spg
     winrating_diff = homestats.winrating - awaystats.winrating
-    return Stats(ppg_diff, papg_diff, spg_diff, winrating_diff)
+
+    win_diff = 0.0  # Isn't being used.
+    return Stats(ppg_diff, papg_diff, spg_diff, winrating_diff, win_diff)
+
+
+def examine_stat(team_stats, n, filter_func, sort_key, reverse):
+    """
+    Filters the set of teams and sorts them by a specific key (e.g. at-home ppg)
+    and then returns the n teams with the highest (reverse=True),
+    or lowest (reverse=False) key value.
+    """
+    team_stats_filtered = filter(filter_func, team_stats)
+    team_stats_filtered.sort(key=sort_key, reverse=reverse)
+    return team_stats_filtered[0:n]
 
 
 def examine_ppg(team_stats, n):
-    team_stats_filtered = filter(
-        lambda x: x.home.ppg > x.away.ppg, team_stats)
-    team_stats_filtered.sort(key=lambda x: x.home.ppg, reverse=True)
-    for team in team_stats_filtered[0:n]:
+    teams_by_ppg = examine_stat(
+        team_stats,
+        n,
+        lambda x: x.home.ppg > x.away.ppg,
+        lambda x: x.home.ppg,
+        True
+    )
+    for team in teams_by_ppg:
         print team.name, team.home.ppg, team.away.ppg
 
 
 def examine_papg(team_stats, n):
-    team_stats_filtered = filter(
-        lambda x: x.home.papg < x.away.papg, team_stats)
-    team_stats_filtered.sort(key=lambda x: x.home.papg)
-    for team in team_stats_filtered[0:n]:
+    teams_by_papg = examine_stat(
+        team_stats,
+        n,
+        lambda x: x.home.papg < x.away.papg,
+        lambda x: x.home.papg,
+        False
+    )
+    for team in teams_by_papg:
         print team.name, team.home.papg, team.away.papg
 
 
 def examine_spg(team_stats, n):
-    team_stats_filtered = filter(
-        lambda x: x.home.spg > x.away.spg, team_stats)
-    team_stats_filtered.sort(key=lambda x: x.home.spg, reverse=True)
-    for team in team_stats_filtered[0:n]:
+    teams_by_spg = examine_stat(
+        team_stats,
+        n,
+        lambda x: x.home.spg > x.away.spg,
+        lambda x: x.home.spg,
+        True
+    )
+    for team in teams_by_spg:
         print team.name, team.home.spg, team.away.spg
 
 
 def examine_winrating(team_stats, n):
-    team_stats_filtered = filter(
-        lambda x: x.home.winrating > x.away.winrating, team_stats)
-    team_stats_filtered.sort(key=lambda x: x.home.winrating, reverse=True)
-    for team in team_stats_filtered[0:n]:
+    teams_by_winrating = examine_stat(
+        team_stats,
+        n,
+        lambda x: x.home.winrating > x.away.winrating,
+        lambda x: x.home.winrating,
+        True
+    )
+    for team in teams_by_winrating:
         print team.name, team.home.winrating, team.away.winrating
 
 
 def examine_ppgratio(team_stats, n):
-    team_stats_filtered = filter(
-        lambda x: x.home.ppg > x.away.ppg, team_stats)
-    team_stats_filtered.sort(key=lambda x: x.ratio.ppg, reverse=True)
-    for team in team_stats_filtered[0:n]:
+    teams_by_ppgratio = examine_stat(
+        team_stats,
+        n,
+        lambda x: x.home.ppg > x.away.ppg,
+        lambda x: x.ratio.ppg,
+        True
+    )
+    for team in teams_by_ppgratio:
         print team.name, team.ratio.ppg
 
 
 def examine_papgratio(team_stats, n):
-    team_stats_filtered = filter(
-        lambda x: x.home.papg < x.away.papg, team_stats)
-    team_stats_filtered.sort(key=lambda x: x.ratio.papg)
-    for team in team_stats_filtered[0:n]:
+    teams_by_papgratio = examine_stat(
+        team_stats,
+        n,
+        lambda x: x.home.papg < x.away.papg,
+        lambda x: x.ratio.papg,
+        False
+    )
+    for team in teams_by_papgratio:
         print team.name, team.ratio.papg
 
 
 def examine_winratingratio(team_stats, n):
-    team_stats_filtered = filter(
-        lambda x: x.home.winrating > x.away.winrating, team_stats)
-    team_stats_filtered.sort(key=lambda x: x.ratio.winrating, reverse=True)
-    for team in team_stats_filtered[0:n]:
+    teams_by_winratingratio = examine_stat(
+        team_stats,
+        n,
+        lambda x: x.home.winrating > x.away.winrating,
+        lambda x: x.ratio.winrating,
+        True
+    )
+    for team in teams_by_winratingratio:
         print team.name, team.ratio.winrating
 
 
 def examine_ppgdiff(team_stats, n):
-    team_stats_filtered = filter(
-        lambda x: x.home.ppg > x.away.ppg, team_stats)
-    team_stats_filtered.sort(key=lambda x: x.diff.ppg, reverse=True)
-    for team in team_stats_filtered[0:n]:
+    teams_by_ppgdiff = examine_stat(
+        team_stats,
+        n,
+        lambda x: x.home.ppg > x.away.ppg,
+        lambda x: x.diff.ppg,
+        True
+    )
+    for team in teams_by_ppgdiff:
         print team.name, team.diff.ppg
 
 
 def examine_papgdiff(team_stats, n):
-    team_stats_filtered = filter(
-        lambda x: x.home.papg < x.away.papg, team_stats)
-    team_stats_filtered.sort(key=lambda x: x.diff.papg)
-    for team in team_stats_filtered[0:n]:
+    teams_by_papgdiff = examine_stat(
+        team_stats,
+        n,
+        lambda x: x.home.papg < x.away.papg,
+        lambda x: x.diff.papg,
+        True
+    )
+    for team in teams_by_papgdiff:
         print team.name, team.diff.papg
 
 
 def examine_spgdiff(team_stats, n):
-    team_stats_filtered = filter(
-        lambda x: x.home.spg > x.away.spg, team_stats)
-    team_stats_filtered.sort(key=lambda x: x.diff.spg, reverse=True)
-    for team in team_stats_filtered[0:n]:
+    teams_by_spgdiff = examine_stat(
+        team_stats,
+        n,
+        lambda x: x.home.spg > x.away.spg,
+        lambda x: x.diff.spg,
+        True
+    )
+    for team in teams_by_spgdiff:
         print team.name, team.diff.spg
 
 
 def examine_winratingdiff(team_stats, n):
-    team_stats_filtered = filter(
-        lambda x: x.home.winrating > x.away.winrating, team_stats)
-    team_stats_filtered.sort(key=lambda x: x.diff.winrating, reverse=True)
-    for team in team_stats_filtered[0:n]:
+    teams_by_winratingdiff = examine_stat(
+        team_stats,
+        n,
+        lambda x: x.home.winrating > x.away.winrating,
+        lambda x: x.diff.winrating,
+        True
+    )
+    for team in teams_by_winratingdiff:
         print team.name, team.diff.winrating
 
 
@@ -184,6 +250,9 @@ if __name__ == '__main__':
     func, years, n = sys.argv[1], sys.argv[2], int(sys.argv[3])
     team_dict = get_team_dict('games/games_%s.csv' % years)
     team_stats = [Team(team, team_dict[team]) for team in team_dict]
+
+    # Bleacher report lists SEA, CHI, MIN, DEN, and KC as the top 5 home
+    # stadiums.
 
     if func == 'ppg':
         examine_ppg(team_stats, n)

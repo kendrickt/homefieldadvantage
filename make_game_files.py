@@ -2,17 +2,17 @@ import sys
 import nflgame
 
 
-def combine_games(years):
+def combine_games(filename, years):
     """
     Given a list of years, the .csv files associated with those years
     are concatenated into a combined game csv.
     """
-    combined_games = file('games/games_combined.csv', 'w')
+    combined_games = file('games/games_%s.csv' % filename, 'w')
     print_header(combined_games)
 
     for year in years:
         try:
-            f = file('games/games_' + year + '.csv', 'r')
+            f = file('games/games_%s.csv' % year, 'r')
         except IOError:
             print year,
             print 'does not have a file associated with it'
@@ -20,7 +20,7 @@ def combine_games(years):
 
         f.next()  # header
         for line in f:
-            combined_games.write('%s' % line)
+            combined_games.write(line)
         f.close()
     combined_games.close()
 
@@ -38,7 +38,7 @@ def get_games(years):
     each containing game data for the regular season of that year.
     """
     for year in years:
-        f = file('games/games_' + year + '.csv', 'w')
+        f = file('games/games_%s.csv' % year, 'w')
         print_header(f)
 
         games = nflgame.games(int(year))
@@ -62,17 +62,11 @@ def get_games(years):
 
 if __name__ == "__main__":
     func = sys.argv[1]
-    years = sys.argv[2:]
-    if not len(years):
-        years = ['2009', '2010', '2011', '2012', '2013', '2014', '2015']
 
-    function_dict = {
-        'get': get_games,
-        'combine': combine_games
-    }
-
-    if func in function_dict:
-        function_dict[func](years)
+    if func == 'get':
+        get_games(sys.argv[2:])
+    elif func == 'combine':
+        combine_games(sys.argv[2], sys.argv[3:])
     else:
         print "invalid function: %s" % func
         print "valid functions are: ", function_dict.keys()
