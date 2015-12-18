@@ -148,6 +148,17 @@ def examine_papg(team_stats, n, f=None):
     )
 
 
+def examine_papg_away(team_stats, n, f=None):
+    examine_stat(
+        team_stats,
+        n,
+        lambda x: x.home.papg < x.away.papg,
+        lambda x: x.away.papg,
+        False,
+        f
+    )
+
+
 def examine_spg(team_stats, n, f=None):
     examine_stat(
         team_stats,
@@ -267,6 +278,7 @@ if __name__ == '__main__':
         'ppgratio': examine_ppgratio,
         'ppgdiff': examine_ppgdiff,
         'papg': examine_papg,
+        'papgaway': examine_papg_away,
         'papgratio': examine_papgratio,
         'papgdiff': examine_papgdiff,
         'spg': examine_spg,

@@ -37,7 +37,7 @@ def plot_data(years, stat, win_type):
     plt.show()
 
 
-def plot_data_comparison(years_x, stat_x, years_y, stat_y):
+def plot_data_comparison(years_x, stat_x, years_y, stat_y, square):
     data_x = get_data('data/%s_top_%s.dat' % (years_x, stat_x))
     data_y = get_data('data/%s_top_%s.dat' % (years_y, stat_y))
     plt.figure(1)
@@ -64,8 +64,14 @@ def plot_data_comparison(years_x, stat_x, years_y, stat_y):
         min_x, max_x = min(min_x, x_val), max(max_x, x_val)
         min_y, max_y = min(min_y, y_val), max(max_y, y_val)
 
-    plt.xlim(min_x - max_x/10.0, max_x + max_x/10.0)
-    plt.ylim(min_y - max_y/10.0, max_y + max_y/10.0)
+    if square:
+        min_x, min_y = min(min_x, min_y), min(min_x, min_y)
+        max_x, max_y = max(max_x, max_y), max(max_x, max_y)
+
+    x_diff = max_x - min_x
+    y_diff = max_y - min_y
+    plt.xlim(min_x - x_diff/6.0, max_x + x_diff/6.0)
+    plt.ylim(min_y - y_diff/6.0, max_y + y_diff/6.0)
 
     # X and Y labels
     plt.ylabel(stat_y, size='large')
@@ -81,6 +87,9 @@ if __name__ == '__main__':
         plot_data(years, stat, win_type)
     elif func == 'compare':
         years_x, stat_x, years_y, stat_y = sys.argv[2:]
-        plot_data_comparison(years_x, stat_x, years_y, stat_y)
+        plot_data_comparison(years_x, stat_x, years_y, stat_y, False)
+    elif func == 'comparesquare':
+        years_x, stat_x, years_y, stat_y = sys.argv[2:]
+        plot_data_comparison(years_x, stat_x, years_y, stat_y, True)
     else:
         print 'Invalid func: %s' % func
