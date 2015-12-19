@@ -219,8 +219,6 @@ def get_data(filename):
 
 
 if __name__ == "__main__":
-    games = read_game_file('games/games_combined.csv')
-
     func = sys.argv[1]
     function_dict = {
         'homeppg': write_home_ppg,
@@ -229,6 +227,8 @@ if __name__ == "__main__":
         'winrating': write_home_win_rating,
         'spread': write_spread
     }
+
+    games = read_game_file(sys.argv[2])
 
     if func in function_dict:
         function_dict[func](games)
